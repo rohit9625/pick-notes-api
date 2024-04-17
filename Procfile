@@ -1,1 +1,1 @@
-web: ./build/install/${rootProject.name}/bin/${rootProject.name}
+web: ./build/install/com.devx.pick-notes-api/bin/com.devx.pick-notes-api
