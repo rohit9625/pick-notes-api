@@ -9,19 +9,25 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Database {
-
     fun init() {
-        val database = Database.connect(
-            url = System.getenv("DATABASE_URL"),
-            user = System.getenv("DB_USER"),
-            driver = "org.postgresql.Driver",
-            password = System.getenv("DB_PASSWD")
-        )
-        transaction(database) {
-            SchemaUtils.create(Users, Notes)
-        }
-    }
+        val urlDecoderRegex = Regex("postgres://(.*):(.*)@(.*):(\\d+)/(.*)")
+        val dbUrl = System.getenv("DATABASE_URL")
+        val matchResult = urlDecoderRegex.find(dbUrl)
 
+        matchResult?.let {
+            val (user, password, host, port, db) = matchResult.destructured
+
+            val database = Database.connect(
+                url = "jdbc:postgresql://$host:$port/$db",
+                user = user,
+                driver = "org.postgresql.Driver",
+                password = password
+            )
+            transaction(database) {
+                SchemaUtils.create(Users, Notes)
+            }
+        }?: throw IllegalArgumentException("Environment variable DATABASE_URL is not set")
+    }
 
     suspend fun <T> dbQuery(block: suspend ()-> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
