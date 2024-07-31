@@ -12,7 +12,7 @@ object Database {
 
     fun init() {
         val database = Database.connect(
-            url = System.getenv("DB_URL"),
+            url = System.getenv("DATABASE_URL"),
             user = System.getenv("DB_USER"),
             driver = "org.postgresql.Driver",
             password = System.getenv("DB_PASSWD")
