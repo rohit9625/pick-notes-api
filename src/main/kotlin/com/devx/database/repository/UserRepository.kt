@@ -8,6 +8,7 @@ import com.devx.database.Database.dbQuery
 import com.devx.database.dao.UserDao
 import com.devx.utils.Encrypt
 import com.devx.utils.Response
+import io.ktor.http.*
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -40,6 +41,7 @@ class UserRepository: UserDao {
         val existingUser = findUserByEmail(user.email)
         return@dbQuery if(existingUser == null){
             Response(
+                data = HttpStatusCode.NotFound,
                 message = "User not registered"
             )
         } else {
@@ -53,6 +55,7 @@ class UserRepository: UserDao {
                 )
             } else {
                 Response(
+                    data = HttpStatusCode.Unauthorized,
                     message = "Invalid password"
                 )
             }

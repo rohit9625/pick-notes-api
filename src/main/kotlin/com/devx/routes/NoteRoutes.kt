@@ -10,6 +10,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -24,13 +25,31 @@ fun Route.configureNoteRoutes() {
                 call.receive<NoteRequest>()
             }catch (e: Exception) {
                 println("Error receiving Note Request Object, Error: ${e.message}")
-                return@post call.respond(
-                    HttpStatusCode.BadRequest,
-                    message = Response(
-                        data = null,
-                        message = "Please provide required fields"
+                when(e) {
+                    is CannotTransformContentToTypeException -> return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        message = Response(
+                            data = null,
+                            message = "Request body is required as JSON"
+                        )
                     )
-                )
+
+                    is BadRequestException -> return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        message = Response(
+                            data = null,
+                            message = "Some fields are missing"
+                        )
+                    )
+
+                    else -> return@post call.respond(
+                        HttpStatusCode.InternalServerError,
+                        message = Response(
+                            data = null,
+                            message = "Internal Server Error"
+                        )
+                    )
+                }
             }
 
             val email = call.principal<JWTPrincipal>()?.payload?.getClaim("email")?.asString()
@@ -109,13 +128,31 @@ fun Route.configureNoteRoutes() {
                 call.receive<Note>()
             }catch (e: Exception) {
                 println("Error receiving Note Request Object, Error: ${e.message}")
-                return@put call.respond(
-                    HttpStatusCode.BadRequest,
-                    message = Response(
-                        data = null,
-                        message = "Please provide required fields"
+                when(e) {
+                    is CannotTransformContentToTypeException -> return@put call.respond(
+                        HttpStatusCode.BadRequest,
+                        message = Response(
+                            data = null,
+                            message = "Request body is required as JSON"
+                        )
                     )
-                )
+
+                    is BadRequestException -> return@put call.respond(
+                        HttpStatusCode.BadRequest,
+                        message = Response(
+                            data = null,
+                            message = "Some fields are missing"
+                        )
+                    )
+
+                    else -> return@put call.respond(
+                        HttpStatusCode.InternalServerError,
+                        message = Response(
+                            data = null,
+                            message = "Internal Server Error"
+                        )
+                    )
+                }
             }
 
             val email = call.principal<JWTPrincipal>()?.payload?.getClaim("email")?.asString()
@@ -131,7 +168,7 @@ fun Route.configureNoteRoutes() {
                 )
 
             }catch (e: Exception) {
-                println("Error while creating a new note, Error: ${e.message}")
+                println("Error while updating note, Error: ${e.message}")
                 call.respond(
                     status = HttpStatusCode.InternalServerError,
                     message = Response(
@@ -153,7 +190,8 @@ fun Route.configureNoteRoutes() {
                 )
 
             }catch (e: Exception) {
-                println("Error while creating a new note, Error: ${e.message}")
+                e.printStackTrace()
+                println("Error while deleting note, Error: ${e.message}")
                 call.respond(
                     status = HttpStatusCode.InternalServerError,
                     message = Response(
