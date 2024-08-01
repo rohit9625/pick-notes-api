@@ -128,7 +128,10 @@ fun Route.configureUserRoutes() {
             if(!result.success) {
                 return@post call.respond(
                     status = result.data as HttpStatusCode,
-                    message = result
+                    message = Response(
+                        data = null,
+                        message = result.message
+                    )
                 )
             }
 

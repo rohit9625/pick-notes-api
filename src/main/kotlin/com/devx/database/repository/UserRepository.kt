@@ -42,7 +42,7 @@ class UserRepository: UserDao {
         return@dbQuery if(existingUser == null){
             Response(
                 data = HttpStatusCode.NotFound,
-                message = "User not registered"
+                message = "User not found"
             )
         } else {
             val isPasswordCorrect = Encrypt.match(user.password, existingUser.password)
