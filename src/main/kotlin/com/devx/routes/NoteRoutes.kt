@@ -76,28 +76,6 @@ fun Route.configureNoteRoutes() {
             }
         }
 
-        get("/{id?}") {
-            val noteId = call.parameters["id"]
-
-            try {
-                val result = noteRepository.readNote(noteId?.toInt()!!)
-                call.respond(
-                    status = HttpStatusCode.OK,
-                    message = result
-                )
-
-            }catch (e: Exception) {
-                println("Error while reading to a note, Error: ${e.message}")
-                call.respond(
-                    status = HttpStatusCode.InternalServerError,
-                    message = Response(
-                        data = null,
-                        message = "Internal Server Error"
-                    )
-                )
-            }
-        }
-
         get {
             val email = call.principal<JWTPrincipal>()?.payload?.getClaim("email")?.asString()
             val user = dbQuery {
@@ -112,7 +90,7 @@ fun Route.configureNoteRoutes() {
                 )
 
             }catch (e: Exception) {
-                println("Error while creating a new note, Error: ${e.message}")
+                println("Error while fetching all notes, Error: ${e.message}")
                 call.respond(
                     status = HttpStatusCode.InternalServerError,
                     message = Response(
@@ -125,7 +103,7 @@ fun Route.configureNoteRoutes() {
 
         put("/update") {
             val note = try {
-                call.receive<Note>()
+                call.receive<NoteRequest>()
             }catch (e: Exception) {
                 println("Error receiving Note Request Object, Error: ${e.message}")
                 when(e) {
