@@ -9,9 +9,9 @@ interface NotesDao {
 
     suspend fun readNote(noteId: Int): Response<Note>
 
-    suspend fun readAllNotes(userId: Int): Response<List<Note?>>
+    suspend fun readAllNotes(userId: Int): Response<List<Note>>
 
-    suspend fun updateNote(userId: Int, note: Note): Response<Note>
+    suspend fun updateNote(userId: Int, note: NoteRequest): Response<Note>
 
     suspend fun deleteNote(noteId: Int): Response<Note>
 }
