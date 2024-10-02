@@ -8,4 +8,6 @@ data class Note(
     val userId: Int,
     val title: String,
     val description: String,
+    val createdAt: Long,
+    val updatedAt: Long
 )

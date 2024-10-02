@@ -7,6 +7,8 @@ object Notes: Table() {
     val userId = integer("userId").references(Users.id)
     val title = text("title")
     val description = text("description")
+    val createdAt = long("createdAt")
+    val updatedAt = long("updatedAt")
 
     override val primaryKey = PrimaryKey(id)
 }

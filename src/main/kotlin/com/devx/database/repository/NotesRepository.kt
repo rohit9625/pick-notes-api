@@ -11,10 +11,14 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class NotesRepository: NotesDao {
     override suspend fun createNote(note: NoteRequest, userId: Int) = dbQuery {
+        val currentTimeMillis = System.currentTimeMillis()
+
         val result = Notes.insert {
             it[this.userId] = userId
             it[title] = note.title
             it[description] = note.description
+            it[createdAt] = currentTimeMillis
+            it[updatedAt] = currentTimeMillis
         }
 
         if(result.resultedValues == null) {
@@ -47,7 +51,7 @@ class NotesRepository: NotesDao {
     }
 
     override suspend fun readAllNotes(userId: Int) = dbQuery {
-        val notes = Notes.select { Notes.userId eq userId }.map { rowToNote(it) }
+        val notes = Notes.select { Notes.userId eq userId }.mapNotNull { rowToNote(it) }
 
         Response(
             success = true,
@@ -56,16 +60,17 @@ class NotesRepository: NotesDao {
         )
     }
 
-    override suspend fun updateNote(userId: Int, note: Note) = dbQuery {
-        val updatedRows = Notes.update({ Notes.id.eq(note.id) and Notes.userId.eq(userId) }) {
+    override suspend fun updateNote(userId: Int, note: NoteRequest) = dbQuery {
+        val updatedRows = Notes.update({ Notes.id.eq(note.id!!) and Notes.userId.eq(userId) }) {
             it[title] = note.title
             it[description] = note.description
+            it[updatedAt] = System.currentTimeMillis()
         }
 
         if (updatedRows > 0) {
             Response(
                 success = true,
-                data = rowToNote(Notes.select { Notes.id eq note.id }.single()),
+                data = rowToNote(Notes.select { Notes.id eq note.id!! }.single()),
                 message = "Note updation successful"
             )
         } else {
@@ -100,7 +105,9 @@ class NotesRepository: NotesDao {
                 id = row[Notes.id],
                 userId = row[Notes.userId],
                 title = row[Notes.title],
-                description = row[Notes.description]
+                description = row[Notes.description],
+                createdAt = row[Notes.createdAt],
+                updatedAt = row[Notes.updatedAt]
             )
         }
     }
